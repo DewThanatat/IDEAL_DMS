@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IDEAL Advanced Design — DMS v4 (Enterprise)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* CSS เหมือน V3 แต่มีการปรับปรุงเรื่อง Responsive และ Progress Bar */
+:root {
+  --bg:#F0F2F7;--surface:#FFFFFF;--surface2:#F7F8FB;--surface3:#EEF0F6;
+  --border:#E2E5EF;--border2:#CDD2E0;--text:#111827;--muted:#6B7280;--hint:#9CA3AF;
+  --accent:#1A56DB;--accent-bg:#EBF2FF;--accent-hover:#1446C0;
+  --green:#059669;--green-bg:#ECFDF5;--green-border:#A7F3D0;
+  --yellow:#D97706;--yellow-bg:#FFFBEB;--yellow-border:#FDE68A;
+  --red:#DC2626;--red-bg:#FEF2F2;--red-border:#FECACA;
+  --orange:#EA580C;--orange-bg:#FFF7ED;--purple:#7C3AED;--purple-bg:#F5F3FF;
+  --teal:#0D9488;--teal-bg:#F0FDFA;--blue2:#0284C7;--blue2-bg:#F0F9FF;
+  --sidebar:228px;--radius:10px;--radius-sm:7px;--radius-lg:14px;
+  --shadow:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.05);
+  --shadow-md:0 4px 12px rgba(0,0,0,.1);
+}
+*{box-sizing:border-box;margin:0;padding:0} html{scroll-behavior:smooth}
+body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.55}
+button,input,select,textarea{font-family:inherit} a{color:var(--accent);text-decoration:none}
+.shell{display:flex;min-height:100vh}
+.sidebar{width:var(--sidebar);background:var(--surface);border-right:1px solid var(--border);position:fixed;top:0;left:0;bottom:0;display:flex;flex-direction:column;z-index:50}
+.content{margin-left:var(--sidebar);flex:1;padding:26px 30px;min-height:100vh}
+.sb-logo{padding:18px 16px 14px;border-bottom:1px solid var(--border)}
+.sb-brand{display:flex;align-items:center;gap:10px}
+.sb-icon{width:34px;height:34px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.sb-name{font-size:12px;font-weight:800;color:var(--text);letter-spacing:.03em;line-height:1.3}
+.sb-ver{font-size:10px;color:var(--muted);font-weight:500;margin-top:1px}
+.sb-nav{flex:1;padding:8px 10px;overflow-y:auto}
+.sb-sec{font-size:10px;color:var(--hint);letter-spacing:.1em;text-transform:uppercase;padding:12px 8px 4px;font-weight:600}
+.nav-btn{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:var(--radius-sm);border:none;background:none;color:var(--muted);font-size:13.5px;font-weight:500;cursor:pointer;width:100%;text-align:left;transition:all .12s;position:relative}
+.nav-btn:hover{background:var(--bg);color:var(--text)}
+.nav-btn.on{background:var(--accent-bg);color:var(--accent);font-weight:600}
+.nav-btn .ico{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+.nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:99px;min-width:18px;text-align:center}
+.sb-foot{padding:10px 14px;border-top:1px solid var(--border)}
+.sb-date{font-size:12px;font-weight:700;color:var(--text)}
+.sb-hint{font-size:10.5px;color:var(--hint);margin-top:2px}
+.topbar{display:flex;align-items:center;gap:10px;margin-bottom:22px}
+.topbar h1{font-size:21px;font-weight:800;flex:1;line-height:1.2}
+.topbar .sub-title{font-size:13px;color:var(--muted);font-weight:400;margin-top:1px}
+.topbar-actions{display:flex;gap:8px;align-items:center;flex-shrink:0}
+.search-wrap{position:relative;margin-bottom:20px}
+.search-wrap input{width:100%;background:var(--surface);border:1.5px solid var(--border2);border-radius:var(--radius);padding:11px 46px 11px 42px;font-size:14px;color:var(--text);outline:none;transition:border-color .15s;box-shadow:var(--shadow)}
+.search-wrap input:focus{border-color:var(--accent)}
+.search-wrap .s-left{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--hint);font-size:17px;pointer-events:none}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow);transition:box-shadow .15s;cursor:default;position:relative;overflow:hidden}
+.stat-card:hover{box-shadow:var(--shadow-md)}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--radius) var(--radius) 0 0}
+.stat-card.c-blue::before{background:var(--accent)} .stat-card.c-green::before{background:var(--green)}
+.stat-card.c-red::before{background:var(--red)} .stat-card.c-yellow::before{background:var(--yellow)}
+.stat-lbl{font-size:11px;color:var(--muted);font-weight:600;margin-bottom:7px;letter-spacing:.02em}
+.stat-val{font-size:26px;font-weight:800;line-height:1;margin-bottom:4px}
+.stat-note{font-size:11px;color:var(--hint)}
+.stat-ico{position:absolute;right:14px;top:16px;font-size:26px;opacity:.15}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:18px;overflow:hidden}
+.card-h{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:8px}
+.card-h h3{font-size:14px;font-weight:700;display:flex;align-items:center;gap:7px}
+.card-body{padding:16px 18px} 
+.card-body-p0{padding:0; overflow-x: auto;} /* แก้ไขให้ Table ไม่ล้นจอบนมือถือ */
+.tbl{width:100%;border-collapse:collapse;min-width:600px}
+.tbl th{text-align:left;font-size:11px;color:var(--muted);padding:9px 14px;border-bottom:1px solid var(--border);font-weight:700;letter-spacing:.05em;text-transform:uppercase;background:var(--surface2);white-space:nowrap}
+.tbl td{padding:11px 14px;font-size:13px;border-bottom:1px solid var(--border);vertical-align:middle}
+.tbl tbody tr:hover td{background:var(--surface2)}
+.tbl .td-num{font-family:'IBM Plex Mono',monospace;font-size:12.5px}
+.tbl .td-actions{display:flex;gap:5px;align-items:center}
+.pill{display:inline-flex;align-items:center;font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px;white-space:nowrap;gap:4px}
+.p-blue{background:var(--accent-bg);color:var(--accent)} .p-green{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}
+.p-yellow{background:var(--yellow-bg);color:var(--yellow);border:1px solid var(--yellow-border)}
+.p-red{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)}
+.p-gray{background:#F3F4F6;color:#4B5563;border:1px solid #E5E7EB}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 15px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .12s;white-space:nowrap}
+.btn-primary{background:var(--accent);color:#fff;box-shadow:0 1px 3px rgba(26,86,219,.3)}
+.btn-primary:hover{background:var(--accent-hover)}
+.btn-ghost{background:transparent;color:var(--muted);border:1.5px solid var(--border2)}
+.btn-ghost:hover{color:var(--text);background:var(--bg);border-color:var(--border2)}
+.btn-danger{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)}
+.btn-success{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}
+.btn-sm{padding:5px 10px;font-size:12px} .btn-xs{padding:3px 8px;font-size:11.5px;border-radius:5px}
+.btn-icon{padding:6px;border-radius:var(--radius-sm);background:none;border:1.5px solid var(--border2);cursor:pointer;color:var(--muted);transition:all .12s;font-size:15px}
+.btn-icon:hover{background:var(--bg);color:var(--text)}
+.f-row{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-bottom:13px}
+.f-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:13px;margin-bottom:13px}
+.f-full{grid-column:1/-1}
+.f-group{display:flex;flex-direction:column;gap:5px}
+.f-group label{font-size:12px;color:var(--muted);font-weight:600;letter-spacing:.02em}
+.f-group input,.f-group select,.f-group textarea{background:var(--surface2);border:1.5px solid var(--border2);border-radius:var(--radius-sm);padding:9px 12px;font-size:13px;color:var(--text);outline:none;transition:border-color .15s}
+.f-group input:focus,.f-group select:focus,.f-group textarea:focus{border-color:var(--accent);background:var(--surface)}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(4px);padding:20px}
+.overlay.open{display:flex;animation:fadeIn .18s ease} @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{background:var(--surface);border-radius:var(--radius-lg);border:1px solid var(--border2);padding:24px;width:580px;max-width:100%;max-height:88vh;overflow-y:auto;animation:slideUp .2s ease}
+.modal-lg{width:720px} @keyframes slideUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.modal-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.modal-h h3{font-size:16px;font-weight:800}
+.modal-close{background:var(--bg);border:none;color:var(--muted);font-size:18px;cursor:pointer;padding:4px 8px;border-radius:6px;line-height:1}
+.modal-foot{display:flex;justify-content:flex-end;gap:8px;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
+.alert{display:flex;align-items:flex-start;gap:9px;padding:10px 14px;border-radius:var(--radius-sm);font-size:13px;margin-bottom:10px}
+.alert-warn{background:var(--yellow-bg);border:1px solid var(--yellow-border);color:var(--yellow)}
+.alert-danger{background:var(--red-bg);border:1px solid var(--red-border);color:var(--red)}
+.alert-info{background:var(--accent-bg);border:1px solid #BFDBFE;color:var(--accent)}
+.page{display:none}.page.on{display:block}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.g3-1{display:grid;grid-template-columns:2fr 1fr;gap:18px}
+.empty{text-align:center;padding:40px 16px;color:var(--hint);font-size:13px}
+.empty .e-ico{font-size:36px;margin-bottom:10px}
+.empty .e-msg{font-weight:500;color:var(--muted)}
+.toast{position:fixed;bottom:24px;right:24px;background:#1F2937;color:#fff;padding:11px 18px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;z-index:500;opacity:0;transform:translateY(8px);transition:all .2s;pointer-events:none;max-width:320px;box-shadow:var(--shadow-md)}
+.toast.show{opacity:1;transform:translateY(0)}
+.wht-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.wht-box{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:13px 15px;text-align:center}
+.wht-box .wb-lbl{font-size:11px;color:var(--muted);font-weight:600;margin-bottom:5px}
+.wht-box .wb-val{font-size:20px;font-weight:800}
+.year-tabs{display:flex;gap:6px;margin-bottom:18px}
+.ytab{padding:6px 14px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;border:1.5px solid var(--border2);background:var(--surface);color:var(--muted);transition:all .12s}
+.ytab:hover,.ytab.on{border-color:var(--accent);color:var(--accent)} .ytab.on{background:var(--accent);color:#fff}
+/* 📊 Progress Bar Tracker */
+.progress-container {background:var(--surface3); border-radius:99px; height:8px; width:100%; overflow:hidden; margin-top:8px;}
+.progress-bar {height:100%; background:var(--accent); border-radius:99px; transition:width 0.4s ease;}
+.progress-bar.warning {background:var(--orange);} .progress-bar.danger {background:var(--red);}
+
+@media(max-width:860px){
+  .sidebar{width:58px} .sb-name,.sb-ver,.sb-sec,.nav-btn span,.sb-hint,.sb-date+*{display:none}
+  .sb-brand{justify-content:center} .sb-logo{padding:12px 10px}
+  .nav-btn{justify-content:center;padding:10px;gap:0} .content{margin-left:58px;padding:16px 14px}
+  .stats-grid{grid-template-columns:1fr 1fr} .g2,.g3-1{grid-template-columns:1fr} .f-row,.f-row3{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-brand">
+      <div class="sb-icon">🏗️</div>
+      <div>
+        <div class="sb-name">IDEAL ADVANCED</div>
+        <div class="sb-ver">DMS v4 · Enterprise</div>
+      </div>
+    </div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-sec">หน้าหลัก</div>
+    <button class="nav-btn on" data-page="dashboard"><span class="ico">🏠</span><span>Dashboard</span></button>
+    <div class="sb-sec">เอกสารการเงิน</div>
+    <button class="nav-btn" data-page="receipts"><span class="ico">🧾</span><span>ใบเสร็จรับเงิน</span></button>
+    <button class="nav-btn" data-page="invoice"><span class="ico">📋</span><span>ใบแจ้งหนี้</span></button>
+    <button class="nav-btn" data-page="quotation"><span class="ico">📝</span><span>ใบเสนอราคา</span></button>
+    <button class="nav-btn" data-page="accounting"><span class="ico">📊</span><span>บัญชีรายเดือน</span></button>
+    <button class="nav-btn" data-page="wht"><span class="ico">📌</span><span>หักณที่จ่าย 3%</span></button>
+    <div class="sb-sec">งาน & โครงการ</div>
+    <button class="nav-btn" data-page="projects"><span class="ico">🏗️</span><span>โครงการ/งาน</span></button>
+    <button class="nav-btn" data-page="tasks"><span class="ico">✅</span><span>งานค้าง</span><span class="nav-badge" id="badge-tasks" style="display:none">0</span></button>
+    <div class="sb-sec">เครื่องมือ</div>
+    <button class="nav-btn" data-page="clients"><span class="ico">👥</span><span>ลูกค้า/Vendor</span></button>
+    <button class="nav-btn" data-page="settings"><span class="ico">⚙️</span><span>ตั้งค่า & Backup</span></button>
+  </nav>
+  <div class="sb-foot">
+    <div class="sb-date" id="sb-date"></div>
+  </div>
+</aside>
+
+<main class="content">
+
+<div class="page on" id="page-dashboard">
+  <div class="topbar">
+    <div><h1>📊 Dashboard</h1><div class="sub-title">ภาพรวมธุรกิจ IDEAL Advanced Design</div></div>
+  </div>
+  <div class="card" style="padding:16px 20px; margin-bottom:22px; background:var(--surface2);">
+      <div style="display:flex; justify-content:space-between; align-items:flex-end;">
+          <div>
+              <div style="font-size:12px; font-weight:600; color:var(--muted)">เพดานรายรับสะสม (เกณฑ์ VAT 1.8 ล้าน) - ปีปัจจุบัน</div>
+              <div style="font-size:20px; font-weight:800; color:var(--text)" id="vat-current-txt">฿0 / ฿1,800,000</div>
+          </div>
+          <div id="vat-percent-txt" style="font-weight:700; color:var(--accent);">0%</div>
+      </div>
+      <div class="progress-container"><div id="vat-progress" class="progress-bar" style="width: 0%;"></div></div>
+  </div>
+
+  <div class="stats-grid" id="dash-stats">
+    <div class="stat-card c-green"><div class="stat-lbl">รายรับเดือนนี้</div><div class="stat-val" id="ds-income" style="color:var(--green)">฿ 0</div><div class="stat-ico">💰</div></div>
+    <div class="stat-card c-red"><div class="stat-lbl">รายจ่ายเดือนนี้</div><div class="stat-val" id="ds-expense" style="color:var(--red)">฿ 0</div><div class="stat-ico">💸</div></div>
+    <div class="stat-card c-blue"><div class="stat-lbl">คงเหลือสุทธิ</div><div class="stat-val" id="ds-balance">฿ 0</div><div class="stat-ico">📈</div></div>
+    <div class="stat-card c-yellow"><div class="stat-lbl">โครงการกำลังดำเนินการ</div><div class="stat-val" id="ds-tasks" style="color:var(--yellow)">0</div><div class="stat-ico">🏗️</div></div>
+  </div>
+
+  <div class="g3-1">
+    <div>
+      <div class="card">
+        <div class="card-h"><h3>🧾 ใบเสร็จล่าสุด</h3><button class="btn btn-ghost btn-sm" onclick="goPage('receipts')">ดูทั้งหมด →</button></div>
+        <div class="card-body-p0">
+          <table class="tbl"><thead><tr><th>รหัส</th><th>ชื่อลูกค้า</th><th>ยอด</th><th>ประเภท</th></tr></thead>
+          <tbody id="dash-rec-table"></tbody></table>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <div class="card-h"><h3>📌 หักณที่จ่าย ปีนี้</h3></div>
+        <div class="card-body">
+          <div class="wht-summary" style="grid-template-columns:1fr">
+            <div class="wht-box" style="text-align:left; display:flex; justify-content:space-between"><span class="wb-lbl">ภาษี 3% ที่หักไป</span><span class="wb-val" id="ds-wht-tax" style="color:var(--red);">฿0</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="page-receipts"><div class="topbar"><div><h1>🧾 ใบเสร็จรับเงิน</h1></div><button class="btn btn-primary" onclick="openForm('receipt')">+ เพิ่มใบเสร็จ</button></div><div class="year-tabs" id="receipt-ytabs"></div><div class="card"><div class="card-body-p0"><table class="tbl"><thead><tr><th>รหัส</th><th>วันที่</th><th>ลูกค้า</th><th>ยอดเงิน</th><th>ลิงก์ไฟล์</th><th></th></tr></thead><tbody id="receipt-tb"></tbody></table></div></div></div>
+<div class="page" id="page-invoice"><div class="topbar"><div><h1>📋 ใบแจ้งหนี้</h1></div><button class="btn btn-primary" onclick="openForm('invoice')">+ เพิ่มใบแจ้งหนี้</button></div><div class="year-tabs" id="invoice-ytabs"></div><div class="card"><div class="card-body-p0"><table class="tbl"><thead><tr><th>รหัส</th><th>วันที่</th><th>ลูกค้า</th><th>ยอดเงิน</th><th>สถานะ</th><th>ลิงก์ไฟล์</th><th></th></tr></thead><tbody id="invoice-tb"></tbody></table></div></div></div>
+<div class="page" id="page-quotation"><div class="topbar"><div><h1>📝 ใบเสนอราคา</h1></div><button class="btn btn-primary" onclick="openForm('quotation')">+ เพิ่มใบเสนอราคา</button></div><div class="year-tabs" id="quotation-ytabs"></div><div class="card"><div class="card-body-p0"><table class="tbl"><thead><tr><th>รหัส</th><th>วันที่</th><th>ลูกค้า</th><th>ยอดเงิน</th><th>สถานะ</th><th>ลิงก์ไฟล์</th><th></th></tr></thead><tbody id="quotation-tb"></tbody></table></div></div></div>
+<div class="page" id="page-wht"><div class="topbar"><div><h1>📌 หักณที่จ่าย 3%</h1></div><button class="btn btn-primary" onclick="openForm('wht')">+ เพิ่มรายการ</button></div><div class="year-tabs" id="wht-ytabs"></div><div class="card"><div class="card-body-p0"><table class="tbl"><thead><tr><th>รหัส</th><th>วันที่</th><th>ผู้จ่าย</th><th>ยอดก่อนหัก</th><th>ภาษี 3%</th><th>สุทธิ</th><th>ลิงก์ไฟล์</th><th></th></tr></thead><tbody id="wht-tb"></tbody></table></div></div></div>
+<div class="page" id="page-projects"><div class="topbar"><div><h1>🏗️ โครงการ</h1></div><button class="btn btn-primary" onclick="openForm('project')">+ เพิ่มโครงการ</button></div><div class="card"><div class="card-body-p0"><table class="tbl"><thead><tr><th>ชื่อโครงการ</th><th>ลูกค้า</th><th>มูลค่า</th><th>สถานะ</th><th>กำหนดส่ง</th><th></th></tr></thead><tbody id="project-tb"></tbody></table></div></div></div>
+<div class="page" id="page-tasks"><div class="topbar"><div><h1>✅ งานค้าง / To-Do</h1></div><button class="btn btn-primary" onclick="openForm('task')">+ เพิ่มงาน</button></div><div class="card"><div class="card-body-p0"><table class="tbl"><thead><tr><th>ชื่องาน</th><th>ระดับ</th><th>สถานะ</th><th>กำหนดส่ง</th><th></th></tr></thead><tbody id="task-tb"></tbody></table></div></div></div>
+<div class="page" id="page-clients"><div class="topbar"><div><h1>👥 ฐานข้อมูลลูกค้า</h1></div><button class="btn btn-primary" onclick="openForm('client')">+ เพิ่มลูกค้า</button></div><div class="card"><div class="card-body-p0"><table class="tbl"><thead><tr><th>ชื่อ</th><th>ประเภท</th><th>เลขภาษี</th><th>เบอร์โทร</th><th></th></tr></thead><tbody id="client-tb"></tbody></table></div></div></div>
+
+<div class="page" id="page-accounting">
+  <div class="topbar"><div><h1>📊 บัญชีรายเดือน</h1></div><div class="topbar-actions"><button class="btn btn-ghost" onclick="openForm('accExp')">+ รายจ่าย</button><button class="btn btn-primary" onclick="openForm('accInc')">+ รายรับ</button></div></div>
+  <div class="year-tabs" id="acc-ytabs"></div>
+  <div class="g2">
+    <div class="card"><div class="card-h" style="background:var(--green-bg)"><h3 style="color:var(--green)">💰 รายรับ</h3></div><div class="card-body-p0"><table class="tbl"><thead><tr><th>เดือน</th><th>ยอดรับ</th><th></th></tr></thead><tbody id="accInc-tb"></tbody></table></div></div>
+    <div class="card"><div class="card-h" style="background:var(--red-bg)"><h3 style="color:var(--red)">💸 รายจ่าย</h3></div><div class="card-body-p0"><table class="tbl"><thead><tr><th>เดือน</th><th>ยอดจ่าย</th><th></th></tr></thead><tbody id="accExp-tb"></tbody></table></div></div>
+  </div>
+</div>
+
+<div class="page" id="page-settings">
+  <div class="topbar"><div><h1>⚙️ ตั้งค่า & Backup</h1></div></div>
+  <div class="g2">
+    <div class="card">
+        <div class="card-h"><h3>🛡️ Line Backup Text (ก๊อปปี้ส่งไลน์)</h3></div>
+        <div class="card-body">
+            <div class="alert alert-info">ก๊อปปี้โค้ดด้านล่างนี้ ส่งเข้าแชท Line ของตัวเองเพื่อสำรองข้อมูล หากคอมพิวเตอร์พัง ให้นำโค้ดนี้มาวางในช่อง Import เพื่อกู้ข้อมูลกลับมา 100%</div>
+            <textarea id="backup-text-area" rows="4" style="width:100%; font-size:11px; font-family:monospace; margin-bottom:10px" readonly></textarea>
+            <button class="btn btn-primary" style="width:100%" onclick="generateBackupText()">🔄 สร้างโค้ด Backup ใหม่ & คัดลอก</button>
+            <hr style="margin:20px 0; border:none; border-top:1px solid var(--border)">
+            <label style="font-size:12px; font-weight:bold; color:var(--muted)">📥 วางโค้ดเพื่อกู้คืนข้อมูล (Restore):</label>
+            <textarea id="restore-text-area" rows="3" style="width:100%; margin-top:5px; font-size:11px; font-family:monospace" placeholder="วางโค้ดที่เคยก๊อปปี้ไว้ที่นี่..."></textarea>
+            <button class="btn btn-danger" style="width:100%; margin-top:10px" onclick="restoreFromText()">⚠️ กู้คืนข้อมูลจากโค้ดนี้</button>
+        </div>
+    </div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<div class="overlay" id="m-receipt"><div class="modal"><div class="modal-h"><h3>🧾 ใบเสร็จรับเงิน</h3><button class="modal-close" onclick="closeM('m-receipt')">✕</button></div>
+    <input type="hidden" id="receipt-id">
+    <div class="f-row"><div class="f-group"><label>รหัส</label><input id="receipt-code"></div><div class="f-group"><label>วันที่</label><input type="date" id="receipt-date"></div></div>
+    <div class="f-row"><div class="f-group"><label>ลูกค้า</label><input id="receipt-client" list="client-list"></div><div class="f-group"><label>ยอดเงิน</label><input type="number" id="receipt-amount"></div></div>
+    <div class="f-row"><div class="f-group"><label>ปี</label><select id="receipt-year"><option value="2567">2567</option><option value="2568">2568</option><option value="2569" selected>2569</option></select></div><div class="f-group"><label>Path / Link (Google Drive)</label><input id="receipt-path" placeholder="C:\.. หรือ https://.."></div></div>
+    <div class="modal-foot"><button class="btn btn-primary" onclick="saveDoc('receipt')">💾 บันทึก</button></div>
+</div></div>
+
+<div class="overlay" id="m-invoice"><div class="modal"><div class="modal-h"><h3>📋 ใบแจ้งหนี้</h3><button class="modal-close" onclick="closeM('m-invoice')">✕</button></div>
+    <input type="hidden" id="invoice-id">
+    <div class="f-row"><div class="f-group"><label>รหัส</label><input id="invoice-code"></div><div class="f-group"><label>วันที่</label><input type="date" id="invoice-date"></div></div>
+    <div class="f-row"><div class="f-group"><label>ลูกค้า</label><input id="invoice-client" list="client-list"></div><div class="f-group"><label>ยอดเงิน</label><input type="number" id="invoice-amount"></div></div>
+    <div class="f-row"><div class="f-group"><label>สถานะ</label><select id="invoice-status"><option value="pending">รอชำระ</option><option value="paid">ชำระแล้ว</option></select></div><div class="f-group"><label>ปี</label><select id="invoice-year"><option value="2567">2567</option><option value="2568">2568</option><option value="2569" selected>2569</option></select></div></div>
+    <div class="f-group" style="margin-bottom:10px"><label>Path / Link</label><input id="invoice-path"></div>
+    <div class="modal-foot"><button class="btn btn-primary" onclick="saveDoc('invoice')">💾 บันทึก</button></div>
+</div></div>
+
+<div class="overlay" id="m-quotation"><div class="modal"><div class="modal-h"><h3>📝 ใบเสนอราคา</h3><button class="modal-close" onclick="closeM('m-quotation')">✕</button></div>
+    <input type="hidden" id="quotation-id">
+    <div class="f-row"><div class="f-group"><label>รหัส</label><input id="quotation-code"></div><div class="f-group"><label>วันที่</label><input type="date" id="quotation-date"></div></div>
+    <div class="f-row"><div class="f-group"><label>ลูกค้า</label><input id="quotation-client" list="client-list"></div><div class="f-group"><label>ยอดเงิน</label><input type="number" id="quotation-amount"></div></div>
+    <div class="f-row"><div class="f-group"><label>สถานะ</label><select id="quotation-status"><option value="sent">ส่งแล้ว</option><option value="approved">อนุมัติ</option></select></div><div class="f-group"><label>ปี</label><select id="quotation-year"><option value="2568">2568</option><option value="2569" selected>2569</option></select></div></div>
+    <div class="f-group" style="margin-bottom:10px"><label>Path / Link</label><input id="quotation-path"></div>
+    <div class="modal-foot"><button class="btn btn-primary" onclick="saveDoc('quotation')">💾 บันทึก</button></div>
+</div></div>
+
+<div class="overlay" id="m-wht"><div class="modal"><div class="modal-h"><h3>📌 หักณที่จ่าย 3%</h3><button class="modal-close" onclick="closeM('m-wht')">✕</button></div>
+    <input type="hidden" id="wht-id">
+    <div class="f-row"><div class="f-group"><label>รหัส</label><input id="wht-code"></div><div class="f-group"><label>วันที่</label><input type="date" id="wht-date"></div></div>
+    <div class="f-row">
+        <div class="f-group"><label>ผู้จ่ายเงิน (ดึงข้อมูลอัตโนมัติ)</label><input id="wht-client" list="client-list" onchange="autoFillWHT(this.value)"></div>
+        <div class="f-group"><label>เลขภาษี</label><input id="wht-taxid" readonly style="background:var(--surface3)"></div>
+    </div>
+    <div class="f-row">
+        <div class="f-group"><label>ยอดก่อนหัก</label><input type="number" id="wht-amount" oninput="calcWHT()"></div>
+        <div class="f-group"><label>ภาษี 3% (คำนวณอัตโนมัติ)</label><input type="number" id="wht-tax" readonly style="background:var(--surface3);color:var(--red)"></div>
+    </div>
+    <div class="f-row"><div class="f-group"><label>ปี</label><select id="wht-year"><option value="2568">2568</option><option value="2569" selected>2569</option></select></div><div class="f-group"><label>Path / Link</label><input id="wht-path"></div></div>
+    <div class="modal-foot"><button class="btn btn-primary" onclick="saveDoc('wht')">💾 บันทึก</button></div>
+</div></div>
+
+<div class="overlay" id="m-project"><div class="modal"><div class="modal-h"><h3>🏗️ โครงการ</h3><button class="modal-close" onclick="closeM('m-project')">✕</button></div>
+    <input type="hidden" id="project-id">
+    <div class="f-group" style="margin-bottom:10px"><label>ชื่อโครงการ</label><input id="project-name"></div>
+    <div class="f-row"><div class="f-group"><label>ลูกค้า</label><input id="project-client" list="client-list"></div><div class="f-group"><label>มูลค่า</label><input type="number" id="project-amount"></div></div>
+    <div class="f-row"><div class="f-group"><label>สถานะ</label><select id="project-status"><option value="active">กำลังทำ</option><option value="done">เสร็จ</option></select></div><div class="f-group"><label>กำหนดเสร็จ</label><input type="date" id="project-date"></div></div>
+    <div class="modal-foot"><button class="btn btn-primary" onclick="saveDoc('project')">💾 บันทึก</button></div>
+</div></div>
+
+<div class="overlay" id="m-task"><div class="modal"><div class="modal-h"><h3>✅ งานค้าง</h3><button class="modal-close" onclick="closeM('m-task')">✕</button></div>
+    <input type="hidden" id="task-id">
+    <div class="f-group" style="margin-bottom:10px"><label>ชื่องาน</label><input id="task-name"></div>
+    <div class="f-row"><div class="f-group"><label>ระดับ</label><select id="task-status"><option value="normal">ปกติ</option><option value="high">เร่งด่วน</option></select></div><div class="f-group"><label>กำหนดเสร็จ</label><input type="date" id="task-date"></div></div>
+    <div class="modal-foot"><button class="btn btn-primary" onclick="saveDoc('task')">💾 บันทึก</button></div>
+</div></div>
+
+<div class="overlay" id="m-client"><div class="modal"><div class="modal-h"><h3>👥 ลูกค้า / Vendor</h3><button class="modal-close" onclick="closeM('m-client')">✕</button></div>
+    <input type="hidden" id="client-id">
+    <div class="f-row"><div class="f-group"><label>ชื่อบริษัท</label><input id="client-name"></div><div class="f-group"><label>ประเภท</label><select id="client-status"><option value="client">ลูกค้า</option><option value="vendor">Vendor</option></select></div></div>
+    <div class="f-row"><div class="f-group"><label>เลขภาษี 13 หลัก</label><input id="client-taxid"></div><div class="f-group"><label>เบอร์โทร</label><input id="client-tel"></div></div>
+    <div class="modal-foot"><button class="btn btn-primary" onclick="saveDoc('client')">💾 บันทึก</button></div>
+</div></div>
+
+<div class="overlay" id="m-accInc"><div class="modal"><div class="modal-h"><h3>💰 รายรับ</h3><button class="modal-close" onclick="closeM('m-accInc')">✕</button></div>
+    <input type="hidden" id="accInc-id">
+    <div class="f-row"><div class="f-group"><label>ปี</label><select id="accInc-year"><option value="2568">2568</option><option value="2569" selected>2569</option></select></div><div class="f-group"><label>เดือน (1-12)</label><input type="number" id="accInc-month" min="1" max="12"></div></div>
+    <div class="f-group" style="margin-bottom:10px"><label>ยอดรับ</label><input type="number" id="accInc-amount"></div>
+    <div class="modal-foot"><button class="btn btn-primary" onclick="saveDoc('accInc')">💾 บันทึก</button></div>
+</div></div>
+
+<div class="overlay" id="m-accExp"><div class="modal"><div class="modal-h"><h3>💸 รายจ่าย</h3><button class="modal-close" onclick="closeM('m-accExp')">✕</button></div>
+    <input type="hidden" id="accExp-id">
+    <div class="f-row"><div class="f-group"><label>ปี</label><select id="accExp-year"><option value="2568">2568</option><option value="2569" selected>2569</option></select></div><div class="f-group"><label>เดือน (1-12)</label><input type="number" id="accExp-month" min="1" max="12"></div></div>
+    <div class="f-group" style="margin-bottom:10px"><label>ยอดจ่าย</label><input type="number" id="accExp-amount"></div>
+    <div class="modal-foot"><button class="btn btn-primary" onclick="saveDoc('accExp')">💾 บันทึก</button></div>
+</div></div>
+
+<datalist id="client-list"></datalist>
+
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+// ── STORAGE ──
+const KEY = 'ideal_dms_v4';
+const get = k => { try { return JSON.parse(localStorage.getItem(KEY+'_'+k)) || []; } catch(e){ return []; } };
+const set = (k,v) => localStorage.setItem(KEY+'_'+k, JSON.stringify(v));
+const uid = () => Date.now().toString(36);
+
+// ── UTILS ──
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2200); }
+function fmt(n){ return '฿ '+(+n||0).toLocaleString(); }
+function openM(id){ document.getElementById(id).classList.add('open'); }
+function closeM(id){ document.getElementById(id).classList.remove('open'); }
+function goPage(id){ document.querySelectorAll('.page').forEach(p=>p.classList.remove('on')); document.getElementById('page-'+id).classList.add('on'); document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('on')); document.querySelector(`[data-page="${id}"]`).classList.add('on'); renderAll(); }
+document.querySelectorAll('.nav-btn').forEach(b=>b.addEventListener('click',()=>goPage(b.dataset.page)));
+document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{ if(e.target===o) closeM(o.id); }));
+
+// ── SMART LINK ──
+function openSmartLink(path) {
+    if(!path) return;
+    if(path.startsWith('http')) { window.open(path, '_blank'); } 
+    else {
+        if(navigator.clipboard) { navigator.clipboard.writeText(path).then(()=>toast('📋 คัดลอก Path แล้ว (นำไปวางใน File Explorer)')).catch(()=>prompt('Copy:',path)); }
+        else prompt('คัดลอก Path ด้านล่าง:', path);
+    }
+}
+function renderLinkBtn(path) {
+    if(!path) return '<span style="color:var(--hint)">—</span>';
+    const isUrl = path.startsWith('http');
+    return `<button class="btn btn-ghost btn-xs" style="${isUrl?'color:var(--accent);border-color:var(--accent)':''}" onclick="openSmartLink('${path.replace(/'/g,"\\'")}')">${isUrl?'👁️ เปิดไฟล์':'📂 Copy Path'}</button>`;
+}
+
+// ── INIT ──
+let currentYear = "2569";
+(function(){
+    document.getElementById('sb-date').textContent = new Date().toLocaleDateString('th-TH',{weekday:'short',year:'numeric',month:'short',day:'numeric'});
+    ['receipt','invoice','quotation','wht','acc'].forEach(type=>{
+        const c = document.getElementById(type+'-ytabs');
+        if(c) c.innerHTML = ['2567','2568','2569'].map(y=>`<button class="ytab${y===currentYear?' on':''}" onclick="setYear('${y}')">${y}</button>`).join('');
+    });
+    renderAll();
+})();
+
+function setYear(y) { currentYear = y; ['receipt','invoice','quotation','wht','acc'].forEach(t=> { const c=document.getElementById(t+'-ytabs'); if(c) [...c.children].forEach(btn=>btn.classList.toggle('on', btn.textContent===y)); }); renderAll(); }
+
+// ── AUTO FILL (WHT) ──
+function autoFillWHT(clientName) {
+    const c = get('client').find(x => x.name === clientName);
+    if(c && c.taxid) { document.getElementById('wht-taxid').value = c.taxid; toast('🤖 ดึงเลขภาษีอัตโนมัติ'); }
+}
+function calcWHT() {
+    const g = +document.getElementById('wht-amount').value || 0;
+    document.getElementById('wht-tax').value = (Math.round(g * 0.03 * 100) / 100).toFixed(2);
+}
+
+// ── UNIFIED CRUD ──
+// กำหนด Schema สำหรับแต่ละประเภทฟอร์ม ลดโค้ดซ้ำซ้อน
+const schemas = {
+    receipt: ['code', 'date', 'client', 'amount', 'year', 'path'],
+    invoice: ['code', 'date', 'client', 'amount', 'status', 'year', 'path'],
+    quotation: ['code', 'date', 'client', 'amount', 'status', 'year', 'path'],
+    wht: ['code', 'date', 'client', 'amount', 'tax', 'year', 'path'],
+    project: ['name', 'client', 'amount', 'status', 'date'],
+    task: ['name', 'status', 'date'],
+    client: ['name', 'status', 'taxid', 'tel'],
+    accInc: ['year', 'month', 'amount'],
+    accExp: ['year', 'month', 'amount']
+};
+
+function openForm(type, id = null) {
+    const fields = schemas[type];
+    document.getElementById(`${type}-id`).value = id || '';
+    if (id) {
+        const data = get(type).find(x => x.id === id);
+        if(data) fields.forEach(f => { const el = document.getElementById(`${type}-${f}`); if(el) el.value = data[f] || ''; });
+    } else {
+        fields.forEach(f => { const el = document.getElementById(`${type}-${f}`); if(el) el.value = (f==='year'?currentYear:''); });
+    }
+    openM(`m-${type}`);
+}
+
+function saveDoc(type) {
+    const id = document.getElementById(`${type}-id`).value;
+    const fields = schemas[type];
+    let item = { id: id || uid() };
+    
+    // ดึงค่าจาก DOM
+    fields.forEach(f => {
+        const el = document.getElementById(`${type}-${f}`);
+        if(el) item[f] = (f==='amount'||f==='tax'||f==='month') ? +el.value : el.value.trim();
+    });
+
+    if(item.name === '' || item.code === '') { toast('❌ กรุณากรอกข้อมูลสำคัญ'); return; }
+
+    const arr = get(type);
+    if (id) { const idx = arr.findIndex(x => x.id === id); if(idx >= 0) arr[idx] = item; }
+    else arr.push(item);
+    
+    set(type, arr);
+    closeM(`m-${type}`);
+    toast('💾 บันทึกสำเร็จ');
+    renderAll();
+}
+
+function delDoc(type, id) {
+    if(!confirm('ลบข้อมูลนี้?')) return;
+    set(type, get(type).filter(x => x.id !== id));
+    renderAll(); toast('🗑 ลบแล้ว');
+}
+
+// ── UNIFIED RENDER ──
+function renderAll() {
+    updateClientList();
+    renderTable('receipt', (r) => `<td><b>${r.code}</b></td><td>${r.date}</td><td>${r.client}</td><td style="color:var(--green)"><b>${fmt(r.amount)}</b></td><td>${renderLinkBtn(r.path)}</td>`);
+    renderTable('invoice', (r) => `<td><b>${r.code}</b></td><td>${r.date}</td><td>${r.client}</td><td><b>${fmt(r.amount)}</b></td><td><span class="pill ${r.status==='paid'?'p-green':'p-yellow'}">${r.status==='paid'?'ชำระแล้ว':'รอชำระ'}</span></td><td>${renderLinkBtn(r.path)}</td>`);
+    renderTable('quotation', (r) => `<td><b>${r.code}</b></td><td>${r.date}</td><td>${r.client}</td><td><b>${fmt(r.amount)}</b></td><td><span class="pill ${r.status==='approved'?'p-green':'p-blue'}">${r.status==='approved'?'อนุมัติ':'ส่งแล้ว'}</span></td><td>${renderLinkBtn(r.path)}</td>`);
+    renderTable('wht', (r) => `<td><b>${r.code}</b></td><td>${r.date}</td><td>${r.client}</td><td>${fmt(r.amount)}</td><td style="color:var(--red)">${fmt(r.tax)}</td><td style="color:var(--green)"><b>${fmt(r.amount - r.tax)}</b></td><td>${renderLinkBtn(r.path)}</td>`);
+    renderTable('project', (r) => `<td><b>${r.name}</b></td><td>${r.client}</td><td>${fmt(r.amount)}</td><td><span class="pill ${r.status==='done'?'p-green':'p-blue'}">${r.status==='done'?'เสร็จ':'กำลังทำ'}</span></td><td>${r.date}</td>`, false);
+    renderTable('task', (r) => `<td><b>${r.name}</b></td><td><span class="pill ${r.status==='high'?'p-red':'p-gray'}">${r.status==='high'?'เร่งด่วน':'ปกติ'}</span></td><td>-</td><td>${r.date}</td>`, false);
+    renderTable('client', (r) => `<td><b>${r.name}</b></td><td><span class="pill p-gray">${r.status==='client'?'ลูกค้า':'Vendor'}</span></td><td>${r.taxid||'-'}</td><td>${r.tel||'-'}</td>`, false);
+    
+    renderAccTable('accInc'); renderAccTable('accExp');
+    renderDashboard();
+}
+
+function renderTable(type, rowFn, filterByYear = true) {
+    const el = document.getElementById(`${type}-tb`);
+    if(!el) return;
+    let arr = get(type);
+    if(filterByYear) arr = arr.filter(x => x.year === currentYear);
+    el.innerHTML = arr.length ? arr.map(r => `<tr>${rowFn(r)}<td class="td-actions"><button class="btn-icon" onclick="openForm('${type}','${r.id}')">✏️</button><button class="btn-icon" onclick="delDoc('${type}','${r.id}')">🗑</button></td></tr>`).join('') : `<tr><td colspan="7" class="empty">ยังไม่มีข้อมูล</td></tr>`;
+}
+
+function renderAccTable(type) {
+    const el = document.getElementById(`${type}-tb`);
+    if(!el) return;
+    let arr = get(type).filter(x => x.year === currentYear).sort((a,b)=>a.month-b.month);
+    el.innerHTML = arr.length ? arr.map(r => `<tr><td>เดือน ${r.month}</td><td style="font-weight:bold; color:${type==='accInc'?'var(--green)':'var(--red)'}">${fmt(r.amount)}</td><td class="td-actions"><button class="btn-icon" onclick="openForm('${type}','${r.id}')">✏️</button><button class="btn-icon" onclick="delDoc('${type}','${r.id}')">🗑</button></td></tr>`).join('') : `<tr><td colspan="3" class="empty">ไม่มีข้อมูล</td></tr>`;
+}
+
+function updateClientList() {
+    const html = get('client').map(c => `<option value="${c.name}">`).join('');
+    document.getElementById('client-list').innerHTML = html;
+}
+
+// ── DASHBOARD & VAT TRACKER ──
+function renderDashboard() {
+    const inc = get('accInc').filter(x => x.year === currentYear).reduce((s,x)=>s+x.amount,0);
+    const exp = get('accExp').filter(x => x.year === currentYear).reduce((s,x)=>s+x.amount,0);
+    document.getElementById('ds-income').textContent = fmt(inc);
+    document.getElementById('ds-expense').textContent = fmt(exp);
+    document.getElementById('ds-balance').textContent = fmt(inc - exp);
+    document.getElementById('ds-balance').style.color = (inc-exp)>=0 ? 'var(--green)' : 'var(--red)';
+    document.getElementById('ds-tasks').textContent = get('project').filter(x=>x.status==='active').length;
+    document.getElementById('ds-wht-tax').textContent = fmt(get('wht').filter(x=>x.year===currentYear).reduce((s,x)=>s+x.tax,0));
+    
+    // Recent Receipt
+    const recEl = document.getElementById('dash-rec-table');
+    const recs = get('receipt').slice(-5).reverse();
+    if(recEl) recEl.innerHTML = recs.length ? recs.map(r=>`<tr><td><b>${r.code}</b></td><td>${r.client}</td><td style="color:var(--green);font-weight:bold">${fmt(r.amount)}</td><td>ใบเสร็จ</td></tr>`).join('') : `<tr><td colspan="4" class="empty">ไม่มีข้อมูล</td></tr>`;
+
+    // VAT Progress Bar Tracker (Threshold 1,800,000 THB)
+    const vatThreshold = 1800000;
+    const percent = Math.min(100, (inc / vatThreshold) * 100).toFixed(1);
+    document.getElementById('vat-current-txt').textContent = `฿${inc.toLocaleString()} / ฿1,800,000`;
+    document.getElementById('vat-percent-txt').textContent = `${percent}%`;
+    const pBar = document.getElementById('vat-progress');
+    pBar.style.width = `${percent}%`;
+    if(percent > 90) { pBar.className = 'progress-bar danger'; document.getElementById('vat-percent-txt').style.color = 'var(--red)'; }
+    else if(percent > 75) { pBar.className = 'progress-bar warning'; document.getElementById('vat-percent-txt').style.color = 'var(--orange)'; }
+    else { pBar.className = 'progress-bar'; document.getElementById('vat-percent-txt').style.color = 'var(--accent)'; }
+}
+
+// ── ONE-CLICK BACKUP / RESTORE ──
+function generateBackupText() {
+    const data = { v: 4, d: new Date().toISOString() };
+    Object.keys(schemas).forEach(k => data[k] = get(k));
+    const str = btoa(encodeURIComponent(JSON.stringify(data))); // เข้ารหัสเป็นข้อความ
+    const el = document.getElementById('backup-text-area');
+    el.value = str;
+    el.select(); document.execCommand('copy');
+    toast('✅ คัดลอกโค้ดแล้ว! นำไปวางใน Line ได้เลย');
+}
+function restoreFromText() {
+    const str = document.getElementById('restore-text-area').value.trim();
+    if(!str) { toast('❌ กรุณาวางโค้ดก่อน'); return; }
+    if(!confirm('⚠️ ข้อมูลปัจจุบันจะถูกทับด้วยข้อมูลจากโค้ดนี้ แน่ใจหรือไม่?')) return;
+    try {
+        const data = JSON.parse(decodeURIComponent(atob(str)));
+        if(!data.v) throw new Error('Invalid Backup');
+        Object.keys(schemas).forEach(k => { if(data[k]) set(k, data[k]); });
+        document.getElementById('restore-text-area').value = '';
+        renderAll();
+        toast('🎉 กู้คืนข้อมูลสำเร็จ!');
+    } catch(e) {
+        toast('❌ โค้ดไม่ถูกต้องหรือเสียหาย');
+    }
+}
+</script>
+</body>
+</html>
